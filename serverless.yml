@@ -1,0 +1,79 @@
+service: booking-tool
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-central-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: 'arn:aws:dynamodb:eu-central-1:*:*'
+
+functions:
+  registerStudio:
+    handler: src/functions/registerStudio.handler
+    events:
+      - cognitoUserPool:
+          pool: tattooStudios
+          trigger: PostConfirmation
+          existing: true
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+
+resources:
+  Resources:
+    TattooStudioTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TattooStudio
+        AttributeDefinitions:
+          - AttributeName: studioID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: studioID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    TattooerTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Tattooer
+        AttributeDefinitions:
+          - AttributeName: tattooerID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: tattooerID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    # CognitoUserPoolTattooStudios:
+    #   Type: AWS::Cognito::UserPool
+    #   Properties:
+    #     UserPoolName: tattooStudio
+    #     UsernameAttributes:
+    #       - email
+    #     AutoVerifiedAttributes:
+    #       - email
+    # UserClient:
+    #   Type: AWS::Cognito::UserPoolClient
+    #   Properties:
+    #     ClientName: booking-tool
+    #     GenerateSecret: true
+    #     UserPoolId:
+    #       Ref: tattooStudio
+    #     ExplicitAuthFlows:
+    #       - ADMIN_NO_SRP_AUTH
