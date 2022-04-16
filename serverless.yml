@@ -26,6 +26,20 @@ functions:
           pool: tattooStudios
           trigger: PostConfirmation
           existing: true
+  addTimeslot:
+    handler: src/functions/addTimeslot.handler
+    events:
+      - http:
+          path: timeslots/add
+          method: post
+          cors: true
+  getTimeslots:
+    handler: src/functions/getTimeslots.handler
+    events:
+      - http:
+          path: timeslots/get
+          method: get
+          cors: true
 
 plugins:
   - serverless-plugin-typescript
@@ -59,21 +73,30 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-
-    # CognitoUserPoolTattooStudios:
-    #   Type: AWS::Cognito::UserPool
-    #   Properties:
-    #     UserPoolName: tattooStudio
-    #     UsernameAttributes:
-    #       - email
-    #     AutoVerifiedAttributes:
-    #       - email
-    # UserClient:
-    #   Type: AWS::Cognito::UserPoolClient
-    #   Properties:
-    #     ClientName: booking-tool
-    #     GenerateSecret: true
-    #     UserPoolId:
-    #       Ref: tattooStudio
-    #     ExplicitAuthFlows:
-    #       - ADMIN_NO_SRP_AUTH
+    TimeslotTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Timeslots
+        AttributeDefinitions:
+          - AttributeName: studioID
+            AttributeType: S
+          - AttributeName: timeslotID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: studioID
+            KeyType: HASH
+          - AttributeName: timeslotID
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        # GlobalSecondaryIndexes:
+        #   - IndexName: studioIDIndex
+        #     KeySchema:
+        #       - AttributeName: studioID
+        #         KeyType: HASH
+        #     Projection:
+        #       ProjectionType: ALL
+        #     ProvisionedThroughput:
+        #       ReadCapacityUnits: 1
+        #       WriteCapacityUnits: 1
