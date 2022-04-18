@@ -33,6 +33,13 @@ functions:
           path: timeslots/add
           method: post
           cors: true
+  deleteTimeslot:
+    handler: src/functions/deleteTimeslot.handler
+    events:
+      - http:
+          path: timeslots/delete
+          method: post
+          cors: true
   getTimeslots:
     handler: src/functions/getTimeslots.handler
     events:

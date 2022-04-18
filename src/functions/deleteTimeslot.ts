@@ -12,15 +12,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const params = {
       TableName: 'Timeslots',
-      Item: timeslot,
+      Key: {
+        timeslotID: timeslot.timeslotID,
+        studioID: timeslot.studioID,
+      },
     };
 
     await docClient
-      .put(params, (err, data) => {
+      .delete(params, (err, data) => {
         if (err) {
-          console.error('Unable to add item. Error JSON:', JSON.stringify(err, null, 2));
+          console.error('Unable to delete item. Error JSON:', JSON.stringify(err, null, 2));
         } else {
-          console.log('Added item:', JSON.stringify(data, null, 2));
+          console.log('deleted item:', JSON.stringify(data, null, 2));
         }
       })
       .promise();
@@ -31,7 +34,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: `Added timeslot`,
+      body: `deleted timeslot`,
     };
   } catch (err) {
     return {
