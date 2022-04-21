@@ -1,7 +1,10 @@
 export default interface Timeslot {
   timeslotID: string;
-  start: string;
-  end: string;
   tattooerID: string;
   studioID: string;
+  start: string;
+  end: string;
+  repeats?: boolean;
+  repeatingEnd?: string;
+  repeatingDays?: number[];
 }
