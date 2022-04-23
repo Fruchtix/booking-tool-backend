@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import de from 'dayjs/locale/de';
 import weekday from 'dayjs/plugin/weekday';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { v4 as uuidv4 } from 'uuid';
 
 dayjs.locale({
   ...de,
@@ -50,8 +49,8 @@ async function batchWrite25(arrayOf25: any[], tableName: string) {
   const itemsArray = [];
   for (let i = 0; i < arrayOf25.length; i++) {
     itemsArray.push({
-      PutRequest: {
-        Item: arrayOf25[i],
+      DeleteRequest: {
+        Key: arrayOf25[i],
       },
     });
   }
@@ -85,87 +84,28 @@ function to(promise: Promise<any>) {
     .catch((err: any) => [err]);
 }
 
-const generateTimeslotSeries = (timeslot: Timeslot) => {
-  const repeatingEnd = dayjs(timeslot.repeatingEnd);
-  let repeatingEndReached = false;
-  let start = dayjs(timeslot.start);
-  let end = dayjs(timeslot.end);
-  let currentWeekDay = start.weekday();
-  const startPlusOneMonth = start.add(1, 'month');
-
-  const timeslotSeriesItems = [timeslot];
-  const timeslotsToReturn = [timeslot];
-
-  while (!repeatingEndReached) {
-    timeslot.repeatingDays!.forEach(day => {
-      if (day < currentWeekDay) return;
-
-      const daysFromCurrentDay = day - currentWeekDay;
-      const newTimeslotStart = start.add(daysFromCurrentDay, 'day');
-      const newTimeslotEnd = end.add(daysFromCurrentDay, 'day');
-
-      if (repeatingEnd.isBefore(newTimeslotStart)) {
-        repeatingEndReached = true;
-        return;
-      }
-
-      const newTimeslot: Timeslot = {
-        ...timeslot,
-        timeslotID: uuidv4(),
-        start: newTimeslotStart.format(),
-        end: newTimeslotEnd.format(),
-      };
-
-      timeslotSeriesItems.push(newTimeslot);
-
-      // only return items within the next month
-      if (newTimeslotStart.isBefore(startPlusOneMonth)) {
-        timeslotsToReturn.push(newTimeslot);
-      }
-    });
-
-    start = start.weekday(0).add(7, 'day');
-    currentWeekDay = 0;
-  }
-
-  return [timeslotSeriesItems, timeslotsToReturn];
-};
-
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const parsedBody = JSON.parse(event.body || '');
+
     const timeslot = parsedBody.timeslot as Timeslot;
-    const updateSeries = parsedBody.updateSeries;
 
-    if (timeslot.repeats && updateSeries) {
-      const [timeslotSeriesItems, timeslotsToReturn] = generateTimeslotSeries(timeslot);
-
-      await batchWrite(timeslotSeriesItems, 'Timeslots');
-
+    if (timeslot.seriesID) {
       return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true,
-        },
-        body: JSON.stringify(timeslotsToReturn),
+        statusCode: 500,
+        body: 'Timeslot has no seriesID',
       };
     }
 
-    const params = {
-      TableName: 'Timeslots',
-      Item: timeslot,
-    };
+    // TODO get all timeslotIDs with the seriesID from timeslot.seriesID
 
-    await docClient
-      .put(params, (err, data) => {
-        if (err) {
-          console.error('Unable to add item. Error JSON:', JSON.stringify(err, null, 2));
-        } else {
-          console.log('Added item:', JSON.stringify(data, null, 2));
-        }
-      })
-      .promise();
+    const itemsToDelete = [
+      { timeslotID: timeslot.timeslotID, studioID: timeslot.studioID },
+      { timeslotID: timeslot.timeslotID, studioID: timeslot.studioID },
+      { timeslotID: timeslot.timeslotID, studioID: timeslot.studioID },
+    ];
+
+    await batchWrite(itemsToDelete, 'Timeslots');
 
     return {
       statusCode: 200,
@@ -173,12 +113,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: JSON.stringify([timeslot]),
+      body: `Added batch timeslots`,
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: 'An error occured' + String(err),
+      body: 'An error occured',
     };
   }
 };
