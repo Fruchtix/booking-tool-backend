@@ -9,14 +9,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     const params = {
       TableName: 'Timeslots',
+      KeyConditionExpression: '#studioID = :revieved_studioID',
+      ExpressionAttributeValues: { ':revieved_studioID': studioId },
       ExpressionAttributeNames: {
         '#studioID': 'studioID',
       },
-      ExpressionAttributeValues: { ':revieved_studioID': studioId },
-      KeyConditionExpression: '#studioID = :revieved_studioID',
-      //   IndexName: 'studioIDIndex',
-      //   FilterExpression: '#studioID = :revieved_studioID',
-      //   KeyConditionExpression: { '#studioID': 'studioID' },
     };
 
     let timeslotItems: any = [];

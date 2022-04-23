@@ -41,6 +41,13 @@ functions:
           path: timeslots/delete
           method: post
           cors: true
+  deleteTimeslotSeries:
+    handler: src/functions/deleteTimeslotSeries.handler
+    events:
+      - http:
+          path: timeslots/delete-series
+          method: post
+          cors: true
   getTimeslots:
     handler: src/functions/getTimeslots.handler
     events:
@@ -90,6 +97,8 @@ resources:
             AttributeType: S
           - AttributeName: timeslotID
             AttributeType: S
+          - AttributeName: seriesID
+            AttributeType: S
         KeySchema:
           - AttributeName: studioID
             KeyType: HASH
@@ -98,13 +107,13 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        # GlobalSecondaryIndexes:
-        #   - IndexName: studioIDIndex
-        #     KeySchema:
-        #       - AttributeName: studioID
-        #         KeyType: HASH
-        #     Projection:
-        #       ProjectionType: ALL
-        #     ProvisionedThroughput:
-        #       ReadCapacityUnits: 1
-        #       WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: seriesIndex
+            KeySchema:
+              - AttributeName: seriesID
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1

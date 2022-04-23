@@ -98,7 +98,7 @@ const generateTimeslotSeries = (timeslot: Timeslot) => {
 
   while (!repeatingEndReached) {
     timeslot.repeatingDays!.forEach(day => {
-      if (day < currentWeekDay) return;
+      if (day <= currentWeekDay) return;
 
       const daysFromCurrentDay = day - currentWeekDay;
       const newTimeslotStart = start.add(daysFromCurrentDay, 'day');

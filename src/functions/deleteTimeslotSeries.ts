@@ -84,26 +84,55 @@ function to(promise: Promise<any>) {
     .catch((err: any) => [err]);
 }
 
+const getItemsToDelete = async (timeslot: Timeslot) => {
+  const params = {
+    TableName: 'Timeslots',
+    IndexName: 'seriesIndex',
+    KeyConditionExpression: '#seriesID = :revieved_seriesID',
+    ExpressionAttributeNames: {
+      '#seriesID': 'seriesID',
+    },
+    ExpressionAttributeValues: { ':revieved_seriesID': timeslot.seriesID },
+  };
+
+  let itemsToDelete: any = [];
+  const formattedItemsToDelete: any = [];
+
+  await docClient
+    .query(params, (err, data) => {
+      if (err) {
+        console.error('Error JSON:', JSON.stringify(err, null, 2));
+      } else {
+        itemsToDelete = data.Items;
+      }
+    })
+    .promise();
+
+  itemsToDelete.forEach((timeslot: Timeslot) => {
+    formattedItemsToDelete.push({ timeslotID: timeslot.timeslotID, studioID: timeslot.studioID });
+  });
+
+  return formattedItemsToDelete;
+};
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const parsedBody = JSON.parse(event.body || '');
 
     const timeslot = parsedBody.timeslot as Timeslot;
 
-    if (timeslot.seriesID) {
+    if (!timeslot.seriesID) {
       return {
         statusCode: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
         body: 'Timeslot has no seriesID',
       };
     }
 
-    // TODO get all timeslotIDs with the seriesID from timeslot.seriesID
-
-    const itemsToDelete = [
-      { timeslotID: timeslot.timeslotID, studioID: timeslot.studioID },
-      { timeslotID: timeslot.timeslotID, studioID: timeslot.studioID },
-      { timeslotID: timeslot.timeslotID, studioID: timeslot.studioID },
-    ];
+    const itemsToDelete = await getItemsToDelete(timeslot);
 
     await batchWrite(itemsToDelete, 'Timeslots');
 
@@ -113,12 +142,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: `Added batch timeslots`,
+      body: `Deleted timeslots series`,
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: 'An error occured',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
+      body: 'An error occured ' + String(err),
     };
   }
 };
