@@ -6,6 +6,7 @@ export default interface Timeslot {
   end: string;
   seriesID?: string;
   repeats?: boolean;
+  repeatingStartDate?: string;
   repeatingEnd?: string;
   repeatingDays?: number[];
 }

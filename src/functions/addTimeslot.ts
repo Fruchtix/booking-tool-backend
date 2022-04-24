@@ -88,17 +88,17 @@ function to(promise: Promise<any>) {
 const generateTimeslotSeries = (timeslot: Timeslot) => {
   const repeatingEnd = dayjs(timeslot.repeatingEnd);
   let repeatingEndReached = false;
-  let start = dayjs(timeslot.start);
+  let start = dayjs(timeslot.repeatingStartDate);
   let end = dayjs(timeslot.end);
   let currentWeekDay = start.weekday();
   const startPlusOneMonth = start.add(1, 'month');
 
-  const timeslotSeriesItems = [timeslot];
-  const timeslotsToReturn = [timeslot];
+  const timeslotSeriesItems: Timeslot[] = [];
+  const timeslotsToReturn: Timeslot[] = [];
 
   while (!repeatingEndReached) {
     timeslot.repeatingDays!.forEach(day => {
-      if (day <= currentWeekDay) return;
+      if (day < currentWeekDay) return;
 
       const daysFromCurrentDay = day - currentWeekDay;
       const newTimeslotStart = start.add(daysFromCurrentDay, 'day');
