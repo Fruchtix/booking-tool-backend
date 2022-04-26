@@ -1,11 +1,17 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
+import dayjs from 'dayjs';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const studioId = event.queryStringParameters?.studioID || '';
+    const rangeStartDate = event.queryStringParameters?.rangeStartDate || '';
+    const rangeEndDate = event.queryStringParameters?.rangeEndDate || '';
+
+    // TODO: return only timeslots in certain range
+    // check if dayjs(start of timeslot in db) is between dayjs(rangeStartDate) and dayjs(rangeEndDate)
 
     const params = {
       TableName: 'Timeslots',
