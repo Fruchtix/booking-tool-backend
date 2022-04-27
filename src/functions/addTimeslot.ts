@@ -90,17 +90,16 @@ const generateTimeslotSeries = (timeslot: Timeslot) => {
   let repeatingEndReached = false;
   let start = dayjs(timeslot.repeatingStartDate);
   let end = dayjs(timeslot.end);
-  let currentWeekDay = start.weekday();
+  let currentWeekDay = 0;
   const startPlusTwoMonth = start.add(2, 'month');
 
   const timeslotSeriesItems: Timeslot[] = [];
   const timeslotsToReturn: Timeslot[] = [];
 
   while (!repeatingEndReached) {
-    timeslot.repeatingDays!.forEach(day => {
-      if (day < currentWeekDay) return;
+    timeslot.repeatingDays!.forEach(daysFromCurrentDay => {
+      if (daysFromCurrentDay < currentWeekDay) return;
 
-      const daysFromCurrentDay = day - currentWeekDay;
       const newTimeslotStart = start.add(daysFromCurrentDay, 'day');
       const newTimeslotEnd = end.add(daysFromCurrentDay, 'day');
 
@@ -118,14 +117,14 @@ const generateTimeslotSeries = (timeslot: Timeslot) => {
 
       timeslotSeriesItems.push(newTimeslot);
 
-      // only return items within the next and prev two month
+      // only return items within the next two month
       if (newTimeslotStart.isBefore(startPlusTwoMonth)) {
         timeslotsToReturn.push(newTimeslot);
       }
     });
 
-    start = start.weekday(0).add(7, 'day');
-    currentWeekDay = 0;
+    start = start.add(7, 'day');
+    currentWeekDay = -10;
   }
 
   return [timeslotSeriesItems, timeslotsToReturn];
