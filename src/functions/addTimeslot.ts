@@ -92,7 +92,6 @@ const generateTimeslotSeries = (timeslot: Timeslot) => {
   let end = dayjs(timeslot.end);
   let currentWeekDay = start.weekday();
   const startPlusTwoMonth = start.add(2, 'month');
-  const startMinusTwoMonth = start.subtract(2, 'month');
 
   const timeslotSeriesItems: Timeslot[] = [];
   const timeslotsToReturn: Timeslot[] = [];
@@ -120,7 +119,7 @@ const generateTimeslotSeries = (timeslot: Timeslot) => {
       timeslotSeriesItems.push(newTimeslot);
 
       // only return items within the next and prev two month
-      if (newTimeslotStart.isBefore(startPlusTwoMonth) && newTimeslotStart.isAfter(startMinusTwoMonth)) {
+      if (newTimeslotStart.isBefore(startPlusTwoMonth)) {
         timeslotsToReturn.push(newTimeslot);
       }
     });
@@ -158,15 +157,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       Item: timeslot,
     };
 
-    await docClient
-      .put(params, (err, data) => {
-        if (err) {
-          console.error('Unable to add item. Error JSON:', JSON.stringify(err, null, 2));
-        } else {
-          console.log('Added item:', JSON.stringify(data, null, 2));
-        }
-      })
-      .promise();
+    await docClient.put(params).promise();
 
     return {
       statusCode: 200,

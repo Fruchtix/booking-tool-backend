@@ -98,16 +98,9 @@ const getItemsToDelete = async (timeslot: Timeslot) => {
   let itemsToDelete: any = [];
   const formattedItemsToDelete: any = [];
 
-  await docClient
-    .query(params, (err, data) => {
-      if (err) {
-        console.error('Error JSON:', JSON.stringify(err, null, 2));
-      } else {
-        itemsToDelete = data.Items;
-      }
-    })
-    .promise();
+  const { Items } = await docClient.query(params).promise();
 
+  itemsToDelete = Items;
   itemsToDelete.forEach((timeslot: Timeslot) => {
     formattedItemsToDelete.push({ timeslotID: timeslot.timeslotID, studioID: timeslot.studioID });
   });

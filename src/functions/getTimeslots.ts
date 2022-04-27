@@ -10,8 +10,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const rangeStartDate = event.queryStringParameters?.rangeStartDate || '';
     const rangeEndDate = event.queryStringParameters?.rangeEndDate || '';
 
-    // TODO: return only timeslots in certain range
-    // check if dayjs(start of timeslot in db) is between dayjs(rangeStartDate) and dayjs(rangeEndDate)
+    // TODO later: - return only timeslots in certain range
+    //             - check if dayjs(start of timeslot in db) is between dayjs(rangeStartDate) and dayjs(rangeEndDate)
+    //             - filterExpression: '',
 
     const params = {
       TableName: 'Timeslots',
@@ -24,15 +25,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     let timeslotItems: any = [];
 
-    await docClient
-      .query(params, (err, data) => {
-        if (err) {
-          console.error('Error JSON:', JSON.stringify(err, null, 2));
-        } else {
-          timeslotItems = data.Items;
-        }
-      })
-      .promise();
+    const { Items } = await docClient.query(params).promise();
 
     return {
       statusCode: 200,
@@ -40,12 +33,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: JSON.stringify(timeslotItems),
+      body: JSON.stringify(Items),
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: 'An error occured',
+      body: 'An error occured' + String(err),
     };
   }
 };

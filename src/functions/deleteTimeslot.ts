@@ -18,15 +18,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       },
     };
 
-    await docClient
-      .delete(params, (err, data) => {
-        if (err) {
-          console.error('Unable to delete item. Error JSON:', JSON.stringify(err, null, 2));
-        } else {
-          console.log('deleted item:', JSON.stringify(data, null, 2));
-        }
-      })
-      .promise();
+    await docClient.delete(params).promise();
 
     return {
       statusCode: 200,
@@ -39,7 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   } catch (err) {
     return {
       statusCode: 500,
-      body: 'An error occured',
+      body: 'An error occured' + String(err),
     };
   }
 };
