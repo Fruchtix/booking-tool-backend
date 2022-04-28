@@ -9,4 +9,5 @@ export default interface Timeslot {
   repeatingStartDate?: string;
   repeatingEnd?: string;
   repeatingDays?: number[];
+  ttl?: number;
 }

@@ -113,6 +113,7 @@ const generateTimeslotSeries = (timeslot: Timeslot) => {
         timeslotID: uuidv4(),
         start: newTimeslotStart.format(),
         end: newTimeslotEnd.format(),
+        ttl: newTimeslotEnd.unix(),
       };
 
       timeslotSeriesItems.push(newTimeslot);
@@ -151,9 +152,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       };
     }
 
+    const ttl = dayjs(timeslot.end).unix();
+
     const params = {
       TableName: 'Timeslots',
-      Item: timeslot,
+      Item: { ...timeslot, ttl: ttl },
     };
 
     await docClient.put(params).promise();

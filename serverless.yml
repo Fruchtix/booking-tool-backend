@@ -99,11 +99,16 @@ resources:
             AttributeType: S
           - AttributeName: seriesID
             AttributeType: S
+          - AttributeName: ttl
+            AttributeType: N
         KeySchema:
           - AttributeName: studioID
             KeyType: HASH
           - AttributeName: timeslotID
             KeyType: RANGE
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -117,3 +122,39 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
+    NextAuthTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: next-auth
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            Projection:
+              ProjectionType: ALL
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: expires
+          Enabled: true
