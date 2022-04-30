@@ -76,6 +76,13 @@ functions:
           path: bookings/add
           method: post
           cors: true
+  addTattooer:
+    handler: src/functions/addTattooer.handler
+    events:
+      - http:
+          path: tattooer/add
+          method: post
+          cors: true
 
 plugins:
   - serverless-plugin-typescript
@@ -103,12 +110,26 @@ resources:
         AttributeDefinitions:
           - AttributeName: tattooerID
             AttributeType: S
+          - AttributeName: studioID
+            AttributeType: S
         KeySchema:
           - AttributeName: tattooerID
             KeyType: HASH
+          - AttributeName: studioID
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    #     GlobalSecondaryIndexes:
+    #       - IndexName: tattooerIndex
+    #         KeySchema:
+    #           - AttributeName: tattooerID
+    #             KeyType: HASH
+    #         Projection:
+    #           ProjectionType: ALL
+    #         ProvisionedThroughput:
+    #           ReadCapacityUnits: 1
+    #           WriteCapacityUnits: 1
     TimeslotTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -116,6 +137,8 @@ resources:
         AttributeDefinitions:
           - AttributeName: studioID
             AttributeType: S
+          # - AttributeName: tattooerID
+          #   AttributeType: S
           - AttributeName: timeslotID
             AttributeType: S
           - AttributeName: seriesID
@@ -152,6 +175,8 @@ resources:
             AttributeType: S
           - AttributeName: studioID
             AttributeType: S
+          # - AttributeName: tattooerID
+          #   AttributeType: S
           - AttributeName: status
             AttributeType: S
         KeySchema:
