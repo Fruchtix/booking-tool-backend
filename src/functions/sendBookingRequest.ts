@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import Timeslot from '../types/Timeslot';
+import Booking from '../types/Booking';
+import { v4 as uuidv4 } from 'uuid';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -8,17 +9,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const parsedBody = JSON.parse(event.body || '');
 
-    const timeslot = parsedBody.timeslot as Timeslot;
+    const { studioID, userName } = parsedBody as Booking;
 
     const params = {
-      TableName: 'Timeslots',
-      Key: {
-        timeslotID: timeslot.timeslotID,
-        studioID: timeslot.studioID,
+      TableName: 'Bookings',
+      Item: {
+        bookingID: uuidv4(),
+        studioID: studioID,
+        userName: userName,
+        status: 'open',
       },
     };
 
-    await docClient.delete(params).promise();
+    await docClient.put(params).promise();
+
+    // TODO: send confirm mail
 
     return {
       statusCode: 200,
@@ -26,7 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: `deleted timeslot`,
+      body: `added request`,
     };
   } catch (err) {
     return {

@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import Timeslot from '../types/Timeslot';
+import Studio from '../types/Studio';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -8,17 +8,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const parsedBody = JSON.parse(event.body || '');
 
-    const timeslot = parsedBody.timeslot as Timeslot;
+    const { studioID, studioUrl } = parsedBody as Studio;
 
     const params = {
-      TableName: 'Timeslots',
-      Key: {
-        timeslotID: timeslot.timeslotID,
-        studioID: timeslot.studioID,
+      TableName: 'TattooStudios',
+      Item: {
+        studioID: studioID,
+        studioUrl: studioUrl,
       },
     };
 
-    await docClient.delete(params).promise();
+    await docClient.put(params).promise();
 
     return {
       statusCode: 200,
@@ -26,7 +26,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: `deleted timeslot`,
+      body: `added studio`,
     };
   } catch (err) {
     return {

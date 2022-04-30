@@ -27,6 +27,13 @@ functions:
           pool: tattooStudios
           trigger: PostConfirmation
           existing: true
+  updateStudio:
+    handler: src/functions/updateStudio.handler
+    events:
+      - http:
+          path: studio/update
+          method: post
+          cors: true
   addTimeslot:
     handler: src/functions/addTimeslot.handler
     events:
@@ -55,6 +62,20 @@ functions:
           path: timeslots/get
           method: get
           cors: true
+  getStudio:
+    handler: src/functions/getStudio.handler
+    events:
+      - http:
+          path: studio/get
+          method: get
+          cors: true
+  sendBookingRequest:
+    handler: src/functions/sendBookingRequest.handler
+    events:
+      - http:
+          path: bookings/add
+          method: post
+          cors: true
 
 plugins:
   - serverless-plugin-typescript
@@ -65,12 +86,12 @@ resources:
     TattooStudioTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: TattooStudio
+        TableName: TattooStudios
         AttributeDefinitions:
-          - AttributeName: studioID
+          - AttributeName: studioUrl
             AttributeType: S
         KeySchema:
-          - AttributeName: studioID
+          - AttributeName: studioUrl
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
@@ -116,6 +137,35 @@ resources:
           - IndexName: seriesIndex
             KeySchema:
               - AttributeName: seriesID
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+    BookingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Bookings
+        AttributeDefinitions:
+          - AttributeName: bookingID
+            AttributeType: S
+          - AttributeName: studioID
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+        KeySchema:
+          - AttributeName: bookingID
+            KeyType: HASH
+          - AttributeName: studioID
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: statusIndex
+            KeySchema:
+              - AttributeName: status
                 KeyType: HASH
             Projection:
               ProjectionType: ALL

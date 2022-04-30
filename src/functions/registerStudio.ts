@@ -5,7 +5,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 export const handler = async (event: any, context: any) => {
   try {
     const params = {
-      TableName: 'TattooStudio',
+      TableName: 'TattooStudios',
       Item: {
         studioID: event.request.userAttributes.sub,
         email: event.request.userAttributes.email,
