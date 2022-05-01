@@ -62,11 +62,18 @@ functions:
           path: timeslots/get
           method: get
           cors: true
-  getStudio:
-    handler: src/functions/getStudio.handler
+  getStudioByUrl:
+    handler: src/functions/getStudioByUrl.handler
     events:
       - http:
-          path: studio/get
+          path: studio/by-url/get
+          method: get
+          cors: true
+  getStudioByID:
+    handler: src/functions/getStudioByID.handler
+    events:
+      - http:
+          path: studio/by-id/get
           method: get
           cors: true
   sendBookingRequest:
@@ -74,13 +81,6 @@ functions:
     events:
       - http:
           path: bookings/add
-          method: post
-          cors: true
-  addTattooer:
-    handler: src/functions/addTattooer.handler
-    events:
-      - http:
-          path: tattooer/add
           method: post
           cors: true
 
@@ -93,16 +93,28 @@ resources:
     TattooStudioTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: TattooStudios
+        TableName: TattooStudio
         AttributeDefinitions:
           - AttributeName: studioUrl
             AttributeType: S
+          - AttributeName: studioID
+            AttributeType: S
         KeySchema:
-          - AttributeName: studioUrl
+          - AttributeName: studioID
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: studioUrlIndex
+            KeySchema:
+              - AttributeName: studioUrl
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
     TattooerTable:
       Type: AWS::DynamoDB::Table
       Properties:

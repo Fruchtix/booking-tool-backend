@@ -7,15 +7,11 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
     const parsedBody = JSON.parse(event.body || '');
-
-    const { studioID, studioUrl } = parsedBody as Studio;
+    const studioData = parsedBody as Studio;
 
     const params = {
-      TableName: 'TattooStudios',
-      Item: {
-        studioID: studioID,
-        studioUrl: studioUrl,
-      },
+      TableName: 'TattooStudio',
+      Item: studioData,
     };
 
     await docClient.put(params).promise();

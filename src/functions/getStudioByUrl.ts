@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import Studio from '../types/Studio';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -9,13 +8,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const studioUrl = event.queryStringParameters?.studioUrl || '';
 
     const params = {
-      TableName: 'TattooStudios',
-      Key: {
-        studioUrl: studioUrl,
+      TableName: 'TattooStudio',
+      IndexName: 'studioUrlIndex',
+      KeyConditionExpression: '#studioUrl = :revieved_studioUrl',
+      ExpressionAttributeNames: {
+        '#studioUrl': 'studioUrl',
       },
+      ExpressionAttributeValues: { ':revieved_studioUrl': studioUrl },
     };
 
-    const { Item } = await docClient.get(params).promise();
+    const { Items } = await docClient.query(params).promise();
 
     return {
       statusCode: 200,
@@ -23,7 +25,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: JSON.stringify(Item),
+      body: JSON.stringify(Items),
     };
   } catch (err) {
     return {

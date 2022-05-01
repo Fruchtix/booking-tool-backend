@@ -1,30 +1,20 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import Tattooer from '../types/Tattooer';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const parsedBody = JSON.parse(event.body || '');
-    const tattooer = parsedBody as Tattooer[];
-
-    const itemsArray = [];
-    for (let i = 0; i < tattooer.length; i++) {
-      itemsArray.push({
-        PutRequest: {
-          Item: tattooer[i],
-        },
-      });
-    }
+    const studioID = event.queryStringParameters?.studioID || '';
 
     const params = {
-      RequestItems: {
-        ['Tattooer']: itemsArray,
+      TableName: 'TattooStudio',
+      Key: {
+        studioID: studioID,
       },
     };
 
-    await docClient.batchWrite(params).promise();
+    const { Item } = await docClient.get(params).promise();
 
     return {
       statusCode: 200,
@@ -32,7 +22,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: `added Tattooer`,
+      body: JSON.stringify(Item),
     };
   } catch (err) {
     return {
