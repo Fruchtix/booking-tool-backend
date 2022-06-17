@@ -1,30 +1,28 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
-import Booking from '../types/Booking';
-import { v4 as uuidv4 } from 'uuid';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const parsedBody = JSON.parse(event.body || '');
-
-    const { studioID, userName, tattooerID } = parsedBody as Booking;
+    const studioID = event.queryStringParameters?.studioID || '';
+    const status = event.queryStringParameters?.status || '';
 
     const params = {
       TableName: 'Bookings',
-      Item: {
-        bookingID: uuidv4(),
-        studioID: studioID,
-        tattooerID: tattooerID,
-        userName: userName,
-        status: 'open',
+      IndexName: 'studioIndex',
+      KeyConditionExpression: '#studioID = :revieved_studioID AND #status = :status',
+      ExpressionAttributeValues: {
+        ':revieved_studioID': studioID,
+        ':status': status,
+      },
+      ExpressionAttributeNames: {
+        '#studioID': 'studioID',
+        '#status': 'status',
       },
     };
 
-    await docClient.put(params).promise();
-
-    // TODO: send confirm mail
+    const { Items } = await docClient.query(params).promise();
 
     return {
       statusCode: 200,
@@ -32,7 +30,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Credentials': true,
       },
-      body: `added request`,
+      body: JSON.stringify(Items),
     };
   } catch (err) {
     return {

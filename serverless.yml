@@ -62,6 +62,13 @@ functions:
           path: timeslots/get
           method: get
           cors: true
+  getBookings:
+    handler: src/functions/getBookingsByStudio.handler
+    events:
+      - http:
+          path: bookings/by-studio/get
+          method: get
+          cors: true
   getStudioByUrl:
     handler: src/functions/getStudioByUrl.handler
     events:
@@ -187,8 +194,6 @@ resources:
             AttributeType: S
           - AttributeName: studioID
             AttributeType: S
-          # - AttributeName: tattooerID
-          #   AttributeType: S
           - AttributeName: status
             AttributeType: S
         KeySchema:
@@ -200,10 +205,12 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         GlobalSecondaryIndexes:
-          - IndexName: statusIndex
+          - IndexName: studioIndex
             KeySchema:
-              - AttributeName: status
+              - AttributeName: studioID
                 KeyType: HASH
+              - AttributeName: status
+                KeyType: RANGE
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
