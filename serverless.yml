@@ -63,10 +63,10 @@ functions:
           method: get
           cors: true
   getBookings:
-    handler: src/functions/getBookingsByStudio.handler
+    handler: src/functions/getBookingsByTattooer.handler
     events:
       - http:
-          path: bookings/by-studio/get
+          path: bookings/by-tattooer/get
           method: get
           cors: true
   getStudioByUrl:
@@ -192,22 +192,22 @@ resources:
         AttributeDefinitions:
           - AttributeName: bookingID
             AttributeType: S
-          - AttributeName: studioID
+          - AttributeName: tattooerID
             AttributeType: S
           - AttributeName: status
             AttributeType: S
         KeySchema:
           - AttributeName: bookingID
             KeyType: HASH
-          - AttributeName: studioID
+          - AttributeName: tattooerID
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         GlobalSecondaryIndexes:
-          - IndexName: studioIndex
+          - IndexName: tattooerIndex
             KeySchema:
-              - AttributeName: studioID
+              - AttributeName: tattooerID
                 KeyType: HASH
               - AttributeName: status
                 KeyType: RANGE

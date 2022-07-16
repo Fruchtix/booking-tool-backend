@@ -9,16 +9,36 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const parsedBody = JSON.parse(event.body || '');
 
-    const { studioID, userName, tattooerID } = parsedBody as Booking;
+    const {
+      studioID,
+      userName,
+      tattooerID,
+      userSurname,
+      email,
+      age,
+      tattooDescription,
+      tattooPosition,
+      tattooSize,
+      alreadyCustomer,
+      instaName,
+    } = parsedBody as Booking;
 
     const params = {
       TableName: 'Bookings',
       Item: {
         bookingID: uuidv4(),
-        studioID: studioID,
-        tattooerID: tattooerID,
-        userName: userName,
         status: 'open',
+        studioID,
+        tattooerID,
+        userName,
+        userSurname,
+        email,
+        age,
+        tattooDescription,
+        tattooPosition,
+        tattooSize,
+        alreadyCustomer,
+        instaName,
       },
     };
 

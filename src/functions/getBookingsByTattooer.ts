@@ -5,19 +5,19 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const studioID = event.queryStringParameters?.studioID || '';
+    const tattooerID = event.queryStringParameters?.tattooerID || '';
     const status = event.queryStringParameters?.status || '';
 
     const params = {
       TableName: 'Bookings',
-      IndexName: 'studioIndex',
-      KeyConditionExpression: '#studioID = :revieved_studioID AND #status = :status',
+      IndexName: 'tattooerIndex',
+      KeyConditionExpression: '#tattooerID = :revieved_tattooerID AND #status = :status',
       ExpressionAttributeValues: {
-        ':revieved_studioID': studioID,
+        ':revieved_tattooerID': tattooerID,
         ':status': status,
       },
       ExpressionAttributeNames: {
-        '#studioID': 'studioID',
+        '#tattooerID': 'tattooerID',
         '#status': 'status',
       },
     };
