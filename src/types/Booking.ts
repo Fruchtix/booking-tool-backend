@@ -10,4 +10,5 @@ export default interface Booking {
   tattooSize: string;
   alreadyCustomer: boolean;
   instaName: string;
+  messages?: [];
 }

@@ -90,6 +90,13 @@ functions:
           path: bookings/add
           method: post
           cors: true
+  updateBookingRequest:
+    handler: src/functions/updateBookingRequest.handler
+    events:
+      - http:
+          path: bookings/update
+          method: post
+          cors: true
 
 plugins:
   - serverless-plugin-typescript
